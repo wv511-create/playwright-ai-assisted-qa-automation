@@ -135,9 +135,6 @@ written charter, bug identification with severity classification, and
 building a local, offline AI-assisted tool integrated directly into a test
 pipeline.
 
-Author
-Wani
-
 ## Author
 
 Kittu
