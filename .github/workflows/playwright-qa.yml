@@ -1,0 +1,44 @@
+name: Playwright QA Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  playwright-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Test Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout App Repository
+        uses: actions/checkout@v4
+        with:
+          repository: wv511-create/selenium-cucumber-qa-automation
+          path: app-repo
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps
+
+      - name: Start Web Prototype
+        working-directory: app-repo/web-prototype
+        run: |
+          python -m http.server 3000 &
+          sleep 5
+
+      - name: Verify Web Server
+        run: |
+          curl http://localhost:3000
+
+      - name: Run Playwright Tests
+        run: python -m pytest -v
