@@ -68,13 +68,25 @@ These bugs are intentionally left unfixed, since the bug log itself — with
 proper severity classification and full reproduction steps — is the artifact
 this part of the project demonstrates.
 
-## AI-assisted bug reporting
+## Agentic AI-assisted bug reporting
 
-On any test failure, a pytest hook (`tests/conftest.py`) calls a locally-run
-AI model (Ollama, `llama3.2:1b`) to draft a bug report — severity, steps to
-reproduce, expected vs. actual result — based on the failing test's name and
-error message. Every draft is marked `DRAFT — pending human review` and I
-review it by hand before treating it as final; nothing here is auto-filed.
+On any test failure, a pytest hook (`tests/conftest.py`) triggers a multi-step
+decision pipeline in `bug_report_generator.py` — not a single AI call:
+
+1. **Duplicate check** — scans existing reports in `bug-reports/` and skips
+   generating a new one if a similar failure has already been documented.
+2. **Rule-based severity signal** — a fast, deterministic check against known
+   high/medium-impact keywords (booking, payment, registration vs. filter,
+   search, display), computed before any AI call.
+3. **LLM-drafted report** — a locally-run AI model (Ollama, `llama3.2:1b`)
+   drafts the bug report, informed by the rule-based signal but able to
+   override it based on the actual error content.
+
+Every draft is explicitly marked `DRAFT — pending human review`, and every
+report is reviewed by hand before being treated as final. The rule-based
+signal and the AI's own assessment sometimes disagree — that disagreement is
+intentional and useful, since it surfaces genuine ambiguity for the human
+reviewer rather than silently picking one.
 
 Runs entirely offline — no external API calls, no cost, no data leaves the
 machine.
@@ -83,6 +95,7 @@ Example reports:
 - `bug-reports/cancel_booking_button_not_functional.md`
 - `bug-reports/category_filter_buttons_unresponsive.md`
 - `bug-reports/search_does_not_filter_results.md`
+`
 
 ## Run locally
 
